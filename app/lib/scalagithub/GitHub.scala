@@ -7,9 +7,11 @@ import com.madgag.github.GitHubCredentials
 import com.madgag.okhttpscala._
 import com.squareup.okhttp.Request.Builder
 import com.squareup.okhttp._
+import play.api.http.Status
 import play.api.http.Status._
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.mvc.Results
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -84,6 +86,24 @@ class GitHub(ghCredentials: GitHubCredentials) {
 
   private val AlwaysHitNetwork = new CacheControl.Builder().maxAge(0, SECONDS).build()
 
+
+
+  def checkMembership(org: String, username: String)(implicit ec: ExecutionContext): Future[Boolean] = {
+    /*
+  GET /orgs/:org/members/:username
+   */
+    val url = apiUrlBuilder
+      .addPathSegment("orgs")
+      .addPathSegment(org)
+      .addPathSegment("members")
+      .addPathSegment(username)
+      .build()
+
+    ghCredentials.okHttpClient.execute(addAuthAndCaching(new Builder().url(url)
+      .addHeader("Accept", "application/vnd.github.ironman-preview+json")
+      .get)).map(_.code() == 204)
+  }
+
   def getMembership(org: String, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
     // GET /orgs/:org/memberships/:username
     val url = apiUrlBuilder
@@ -147,11 +167,11 @@ class GitHub(ghCredentials: GitHubCredentials) {
 
       println(rateLimit)
 
-      println("YYY"+json)
+      // println("YYY"+json)
 
       val result = json.validate[T]
 
-      println("XXX"+result)
+      // println("XXX"+result)
 
       GitHubResponse(rateLimit, result.get)
     }

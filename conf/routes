@@ -3,7 +3,8 @@
 # ~~~~
 
 GET         /                                                    controllers.Application.index()
-GET         /new                                                 controllers.Application.newPublicRepo()
+GET         /new                                                 controllers.Application.newRepo()
+POST        /new                                                 controllers.Application.createPublicRepo()
 
 GET         /oauth/callback                                      controllers.Auth.oauthCallback(code: String)
 GET         /logout                                              controllers.Auth.logout()

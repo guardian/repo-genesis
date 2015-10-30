@@ -1,4 +1,8 @@
-@()(implicit req: Request[AnyContent])
+@(repoCreationSettings: Form[controllers.Application.RepoCreation])(implicit req: Request[AnyContent], messages: Messages)
+
+@import views.html.helper.CSRF
+@implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
+
 @main {
     <div class="jumbotron">
         <h1>Make a new GitHub repo!</h1>
@@ -11,6 +15,29 @@
             <p>It lets you make repos in your organisation - even if you're not the owner.</p>
         </div>
         <div class="col-md-6">
+        @b3.form(routes.Application.createPublicRepo()) {
+            @CSRF.formField
+
+            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "20") { input =>
+                <div class="input-group" >
+                    <span class="input-group-addon">[</span>
+                    @input
+                    <span class="input-group-addon">]</span>
+                </div>
+            }
+
+            @b3.inputWrapped("text", repoCreationSettings("teamId"), '_label -> "Initial Admin Team", 'maxlength -> "20") { input =>
+                <div class="input-group" >
+                    <span class="input-group-addon">[</span>
+                    @input
+                    <span class="input-group-addon">]</span>
+                </div>
+            }
+
+            @b3.submit('class -> s"btn btn-lg") {
+                Create
+            }
+        }
         </div>
     </div>
 }

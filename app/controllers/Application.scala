@@ -2,8 +2,13 @@ package controllers
 
 import lib.Bot
 import lib.actions.Actions._
-import lib.scalagithub.{CreateRepo, GitHub}
+import lib.scalagithub.CreateRepo
+import play.api.Play.current
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Application extends Controller {
@@ -12,15 +17,23 @@ object Application extends Controller {
     Ok(views.html.index())
   }
 
-  def newPublicRepo = GitHubAuthenticatedAction.async { implicit req =>
-    val gitHub = new GitHub(Bot.ghCreds)
+  def newRepo = OrgAuthenticated { implicit req =>
+    Ok(views.html.createNewRepo(repoCreationForm))
+  }
 
-    val org = "gu-who-demo-org"
-    val repoName = System.currentTimeMillis().toHexString
-    val repo = CreateRepo(name = repoName, `private` = false)
+  case class RepoCreation(name: String, teamId: Long)
+
+  val repoCreationForm = Form(mapping(
+    "name" -> text(maxLength = 20),
+    "teamId" -> longNumber
+  )(RepoCreation.apply)(RepoCreation.unapply))
+
+  def createPublicRepo = OrgAuthenticated.async(parse.form(repoCreationForm)) { implicit req =>
+    val repoCreation = req.body
+    val repo = CreateRepo(name = repoCreation.name, `private` = false)
     for {
-      createdRepo <- gitHub.createOrgRepo(org, repo)
-      _ <- gitHub.addTeamRepo(1831886, org, repoName)
+      createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, repo)
+      _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
     } yield Redirect(createdRepo.result.html_url + "/settings/collaboration")
   }
 }
