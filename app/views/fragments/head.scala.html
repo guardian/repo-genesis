@@ -1,0 +1,27 @@
+<head>
+    <title>submitGit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="origin">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")" />
+    <script type="text/javascript" src="@routes.Assets.at("lib/jquery/jquery.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("lib/typeahead.js/dist/typeahead.bundle.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("lib/timeago/jquery.timeago.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("lib/handlebars/dist/handlebars.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascript/messageIdPicker.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascript/changeHighlighter.js")"></script>
+    <link rel="stylesheet" href="@routes.Assets.at("lib/octicons/octicons/octicons.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("lib/typeahead.js-bootstrap3.less/typeahead.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+
+    @for(googleAnalyticsId <- lib.AnalyticsConfig.googleAnalyticsIdOpt) {
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('create', '@googleAnalyticsId', 'auto');
+          ga('send', 'pageview');
+        </script>
+    }
+</head>
