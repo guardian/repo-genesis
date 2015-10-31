@@ -8,6 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
+import scala.collection.convert.wrapAsScala._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -18,13 +19,15 @@ object Application extends Controller {
   }
 
   def newRepo = OrgAuthenticated { implicit req =>
-    Ok(views.html.createNewRepo(repoCreationForm))
+    val allTeam = req.gitHub.getMyTeams
+    val teams = allTeam.get(Bot.org).toSeq.sortBy(_.getMembers.size)
+    Ok(views.html.createNewRepo(repoCreationForm, teams))
   }
 
   case class RepoCreation(name: String, teamId: Long)
 
   val repoCreationForm = Form(mapping(
-    "name" -> text(maxLength = 20),
+    "name" -> text(maxLength = 40),
     "teamId" -> longNumber
   )(RepoCreation.apply)(RepoCreation.unapply))
 

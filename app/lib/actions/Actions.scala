@@ -12,7 +12,7 @@ import scala.concurrent.Future
 import scalax.file.ImplicitConversions._
 
 object Actions {
-  private val authScopes = Seq("user:email")
+  private val authScopes = Seq("read:org")
 
   implicit val authClient: Client = Auth.authClient
 

@@ -87,11 +87,10 @@ class GitHub(ghCredentials: GitHubCredentials) {
   private val AlwaysHitNetwork = new CacheControl.Builder().maxAge(0, SECONDS).build()
 
 
+  private val IronmanPreview = "application/vnd.github.ironman-preview+json"
 
   def checkMembership(org: String, username: String)(implicit ec: ExecutionContext): Future[Boolean] = {
-    /*
-  GET /orgs/:org/members/:username
-   */
+    //GET /orgs/:org/members/:username
     val url = apiUrlBuilder
       .addPathSegment("orgs")
       .addPathSegment(org)
@@ -100,7 +99,7 @@ class GitHub(ghCredentials: GitHubCredentials) {
       .build()
 
     ghCredentials.okHttpClient.execute(addAuthAndCaching(new Builder().url(url)
-      .addHeader("Accept", "application/vnd.github.ironman-preview+json")
+      .addHeader("Accept", IronmanPreview)
       .get)).map(_.code() == 204)
   }
 
@@ -143,7 +142,7 @@ class GitHub(ghCredentials: GitHubCredentials) {
       .build()
 
     ghCredentials.okHttpClient.execute(addAuthAndCaching(new Builder().url(url)
-      .addHeader("Accept", "application/vnd.github.ironman-preview+json")
+      .addHeader("Accept", IronmanPreview)
       .put(Json.obj("permission" -> "admin"))))
   }
 
@@ -163,7 +162,7 @@ class GitHub(ghCredentials: GitHubCredentials) {
     } yield {
       val json = Json.parse(response.body().byteStream())
 
-      val rateLimit: RateLimit = getRateLimitDetailsFrom(response)
+      val rateLimit = rateLimitFrom(response)
 
       println(rateLimit)
 
@@ -177,14 +176,12 @@ class GitHub(ghCredentials: GitHubCredentials) {
     }
   }
 
-  def getRateLimitDetailsFrom[T](response: Response): RateLimit = {
+  def rateLimitFrom[T](response: Response): RateLimit = {
     val networkResponse = Option(response.networkResponse())
-    val consumedRateLimit = if (networkResponse.exists(_.code != NOT_MODIFIED)) 1 else 0
-    val rateLimit = RateLimit(
-      consumedRateLimit,
+    RateLimit(
+      consumed = if (networkResponse.exists(_.code != NOT_MODIFIED)) 1 else 0,
       networkResponse.map(rateLimitStatusFrom)
     )
-    rateLimit
   }
 
   def apiUrlBuilder: HttpUrl.Builder = new HttpUrl.Builder().scheme("https").host("api.github.com")

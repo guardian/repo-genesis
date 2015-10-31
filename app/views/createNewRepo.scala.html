@@ -1,4 +1,4 @@
-@(repoCreationSettings: Form[controllers.Application.RepoCreation])(implicit req: Request[AnyContent], messages: Messages)
+@(repoCreationSettings: Form[controllers.Application.RepoCreation], userTeams: Seq[org.kohsuke.github.GHTeam])(implicit req: Request[AnyContent], messages: Messages)
 
 @import views.html.helper.CSRF
 @implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
@@ -18,21 +18,14 @@
         @b3.form(routes.Application.createPublicRepo()) {
             @CSRF.formField
 
-            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "20") { input =>
+            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "40") { input =>
                 <div class="input-group" >
-                    <span class="input-group-addon">[</span>
+                    <span class="input-group-addon">@lib.Bot.org/</span>
                     @input
-                    <span class="input-group-addon">]</span>
                 </div>
             }
 
-            @b3.inputWrapped("text", repoCreationSettings("teamId"), '_label -> "Initial Admin Team", 'maxlength -> "20") { input =>
-                <div class="input-group" >
-                    <span class="input-group-addon">[</span>
-                    @input
-                    <span class="input-group-addon">]</span>
-                </div>
-            }
+            @b3.select( repoCreationSettings("teamId"), options = userTeams.map(t => t.getId.toString -> s"${t.getName} (${t.listMembers().size} members)"), '_label -> "Team for initial Admin rights" )
 
             @b3.submit('class -> s"btn btn-lg") {
                 Create
