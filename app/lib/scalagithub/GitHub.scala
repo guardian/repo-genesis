@@ -49,7 +49,12 @@ case class Repo(
   name: String,
   html_url: String,
   teams_url: String
-)
+) {
+  val settingsUrl = s"$html_url/settings"
+
+  val collaborationSettingsUrl = s"$settingsUrl/collaboration"
+
+}
 
 object User {
   implicit val readsUser = Json.reads[User]
