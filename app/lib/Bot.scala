@@ -22,4 +22,6 @@ object Bot {
   def conn() = ghCreds.conn()
 
   def neoGitHub = new GitHub(ghCreds)
+
+  val orgUser = conn().getOrganization(org)
 }

@@ -11,9 +11,10 @@
         @b3.form(routes.Application.createPublicRepo()) {
             @CSRF.formField
 
-            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "40") { input =>
+            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "40", 'autofocus -> true) { input =>
                 <div class="input-group" >
-                    <span class="input-group-addon">@lib.Bot.org/</span>
+                    <span class="input-group-addon">
+                        <img src="@lib.Bot.orgUser.getAvatarUrl&s=40" width="20" height="20" class="img-rounded"> @lib.Bot.org /</span>
                     @input
                 </div>
             }
@@ -25,7 +26,7 @@
             )
 
             @b3.submit('class -> s"btn btn-primary btn-lg") {
-                Create public repository
+                <span class="octicon octicon-repo"></span> Create public repository
             }
         }
         </div>
