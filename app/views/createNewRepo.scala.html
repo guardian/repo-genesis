@@ -11,7 +11,14 @@
         @b3.form(routes.Application.createPublicRepo()) {
             @CSRF.formField
 
-            @b3.inputWrapped("text", repoCreationSettings("name"), '_label -> "Repo Name", 'maxlength -> "40", 'autofocus -> true) { input =>
+            @b3.inputWrapped(
+                "text",
+                repoCreationSettings("name"),
+                '_label -> "Repository name",
+                'maxlength -> "100",
+                'required -> true,
+                'pattern -> "^[A-Za-z0-9_-]+$",
+                'autofocus -> true) { input =>
                 <div class="input-group" >
                     <span class="input-group-addon">
                         <img src="@lib.Bot.orgUser.getAvatarUrl&s=40" width="20" height="20" class="img-rounded"> @lib.Bot.org /</span>
@@ -22,7 +29,7 @@
             @b3.select(
                 repoCreationSettings("teamId"),
                 options = userTeams.map(t => t.getId.toString -> s"${t.getName} (${t.listMembers().size} members)"),
-                '_label -> "Team for initial Admin rights"
+                '_label -> "GitHub Team for initial Admin rights"
             )
 
             @b3.submit('class -> s"btn btn-primary btn-lg") {

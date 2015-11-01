@@ -8,8 +8,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
-import scala.collection.convert.wrapAsScala._
 
+import scala.collection.convert.wrapAsScala._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Application extends Controller {
@@ -27,7 +27,7 @@ object Application extends Controller {
   case class RepoCreation(name: String, teamId: Long)
 
   val repoCreationForm = Form(mapping(
-    "name" -> text(maxLength = 40),
+    "name" -> text(minLength = 1, maxLength = 100),
     "teamId" -> longNumber
   )(RepoCreation.apply)(RepoCreation.unapply))
 
