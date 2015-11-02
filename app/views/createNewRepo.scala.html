@@ -28,7 +28,7 @@
 
 
             <div class="form-group">
-                <label for="teamId" class="control-label"><span class="octicon octicon-jersey"></span> GitHub Team for initial Admin rights</label>
+                <label for="teamId" class="control-label"><span class="octicon octicon-jersey"></span> GitHub team with initial Admin rights</label>
                 <select id="teamId" name="teamId" class="form-control">
                 @for(t <- userTeams) {
                     <option value="@t.id" data-team-size="@t.size" data-team-name="@t.name" >@t.name (@t.size members)</option>
