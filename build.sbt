@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-agent" % "2.3.2",
   "org.webjars" % "bootstrap" % "3.3.5",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.4-P24",
-  "org.webjars.bower" % "octicons" % "2.2.3",
+  "org.webjars.bower" % "octicons" % "3.1.0",
   "org.webjars.bower" % "select2" % "3.5.4",
   "org.webjars.bower" % "select2-bootstrap-css" % "1.4.6",
   "org.webjars.npm" % "handlebars" % "3.0.3",
