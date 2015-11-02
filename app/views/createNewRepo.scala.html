@@ -40,7 +40,7 @@
             $(document).ready(function() {
                 function format(team) {
                     var t = $(team.element);
-                    return t.data('team-name') + " <small>(" + t.data('team-size') + " members)</small>";
+                    return "<strong>" + t.data('team-name') + "</strong> <small>(" + t.data('team-size') + " members)</small>";
                 }
 
                 $("#teamId").select2({
