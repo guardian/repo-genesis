@@ -1,4 +1,4 @@
-@(repoCreationSettings: Form[controllers.Application.RepoCreation], userTeams: Seq[org.kohsuke.github.GHTeam])(implicit req: Request[AnyContent], messages: Messages)
+@(repoCreationSettings: Form[controllers.Application.RepoCreation], userTeams: Seq[controllers.Application.Team])(implicit req: Request[AnyContent], messages: Messages)
 
 @import views.html.helper.CSRF
 @implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
@@ -26,15 +26,32 @@
                 </div>
             }
 
-            @b3.select(
-                repoCreationSettings("teamId"),
-                options = userTeams.map(t => t.getId.toString -> s"${t.getName} (${t.listMembers().size} members)"),
-                '_label -> "GitHub Team for initial Admin rights"
-            )
 
+            <div class="form-group">
+                <label for="teamId" class="control-label"><span class="octicon octicon-jersey"></span> GitHub Team for initial Admin rights</label>
+                <select id="teamId" name="teamId" class="form-control">
+                @for(t <- userTeams) {
+                    <option value="@t.id" data-team-size="@t.size" data-team-name="@t.name" >@t.name (@t.size members)</option>
+                }
+                </select>
+            </div>
 
             <script>
-                $(document).ready(function() { $("#teamId").select2(); });
+            $(document).ready(function() {
+                function format(team) {
+                    var t = $(team.element);
+                    return t.data('team-name') + " <small>(" + t.data('team-size') + " members)</small>";
+                }
+
+                $("#teamId").select2({
+                    formatResult: format,
+                    formatSelection: format,
+                    escapeMarkup: function(m) { return m; },
+                    matcher: function(term, text, opt) {
+                       return opt.data('team-name').toUpperCase().indexOf(term.toUpperCase())>=0;
+                    }
+                });
+            });
             </script>
 
             @b3.submit('class -> s"btn btn-primary btn-lg") {

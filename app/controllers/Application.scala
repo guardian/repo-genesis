@@ -25,8 +25,10 @@ object Application extends Controller {
     "teamId" -> longNumber
   )(RepoCreation.apply)(RepoCreation.unapply))
 
+  case class Team(id: Long, name: String, size: Int)
+
   def newRepo = OrgAuthenticated { implicit req =>
-    val teams = req.gitHub.getMyTeams.get(Bot.org).toSeq.sortBy(_.getMembers.size)
+    val teams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
     Ok(views.html.createNewRepo(repoCreationForm, teams))
   }
 
