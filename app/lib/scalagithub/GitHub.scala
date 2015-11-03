@@ -89,6 +89,16 @@ case class Membership(
   role: String
 )
 
+object Team {
+  implicit val readsTeam = Json.reads[Team]
+}
+
+case class Team(
+                       id: Long,
+                       name: String,
+                       slug: String
+                       )
+
 class GitHub(ghCredentials: GitHubCredentials) {
 
   implicit def jsonToRequestBody(json: JsValue): RequestBody = RequestBody.create(JsonMediaType, json.toString)
@@ -114,19 +124,17 @@ class GitHub(ghCredentials: GitHubCredentials) {
       .get)).map(_.code() == 204)
   }
 
-  def getMembership(org: String, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
+  def getTeam(teamId: Long)(implicit ec: ExecutionContext): Future[GitHubResponse[Team]] = {
     // GET /orgs/:org/memberships/:username
     val url = apiUrlBuilder
-      .addPathSegment("orgs")
-      .addPathSegment(org)
-      .addPathSegment("memberships")
-      .addPathSegment(username)
+      .addPathSegment("teams")
+      .addPathSegment(teamId.toString)
       .build()
 
-    executeAndReadJson(addAuthAndCaching(new Builder().url(url)))
+    executeAndReadJson[Team](addAuthAndCaching(new Builder().url(url)))
   }
 
-  def getTeam(org: String, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
+  def getMembership(org: String, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
     // GET /orgs/:org/memberships/:username
     val url = apiUrlBuilder
       .addPathSegment("orgs")

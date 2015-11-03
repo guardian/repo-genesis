@@ -43,6 +43,8 @@ object Bot {
 
     println(s"teamIds = $teamIds")
 
+    Future.traverse(teamIds)(tid => neoGitHub.getTeam(tid).map(_.result)).foreach(teams => println(s"Teams allowed are $teams"))
+
     teamIds
   }
 
