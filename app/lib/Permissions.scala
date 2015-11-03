@@ -8,6 +8,10 @@ import scala.concurrent.Future
 
 object Permissions {
 
+  def privateRepoTeams() = {
+    Future.traverse(Bot.teamsAllowedToCreatePrivateRepos)(tid => Bot.neoGitHub.getTeam(tid).map(_.result))
+  }
+
   def allowedToCreatePrivateRepos(user: GHMyself): Future[Boolean] = {
     import Bot.teamsAllowedToCreatePrivateRepos
     println(s"user = ${user.atLogin}")

@@ -2,7 +2,7 @@ package controllers
 
 import com.madgag.github.Implicits._
 import com.madgag.playgithub.auth.GHRequest
-import lib.Bot
+import lib.{Permissions, Bot}
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
 import lib.scalagithub.CreateRepo
@@ -33,9 +33,14 @@ object Application extends Controller {
   case class Team(id: Long, name: String, size: Int)
 
   def newRepo = OrgAuthenticated.async { implicit req =>
-    for (allowPrivate <- allowedToCreatePrivateRepos(req.user)) yield {
-      val teams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
-      Ok(views.html.createNewRepo(repoCreationForm, teams, allowPrivate))
+    for {
+      allowPrivate <- allowedToCreatePrivateRepos(req.user)
+      privateRepoTeams <- Permissions.privateRepoTeams()
+    } yield {
+      val userTeams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
+      println(s"${req.user.atLogin} userTeams : ${userTeams.mkString(",")}")
+      println(s"privateRepoTeams = $privateRepoTeams")
+      Ok(views.html.createNewRepo(repoCreationForm, userTeams, allowPrivate))
     }
   }
 
