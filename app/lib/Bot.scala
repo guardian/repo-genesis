@@ -3,9 +3,12 @@ package lib
 import com.madgag.github.GitHubCredentials
 import lib.scalagithub.GitHub
 import org.kohsuke.github.GHMyself
+import com.madgag.github.Implicits._
 
+import scala.concurrent.Future
 import scalax.file.ImplicitConversions._
 import scalax.file.Path
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Bot {
 
@@ -26,7 +29,12 @@ object Bot {
 
   val orgUser = conn().getOrganization(org)
 
-  val teamsAllowedToCreatePrivateRepos = config.getString("github.teams.can.create.repos.private").get.split(',').map(t => orgUser.getTeamByName(t.trim))
+  val teamsAllowedToCreatePrivateRepos =
+    config.getString("github.teams.can.create.repos.private").get.split(',').map(t => orgUser.getTeamByName(t.trim)).toSet
 
-  def allowedToCreatePrivateRepos(user: GHMyself): Boolean = teamsAllowedToCreatePrivateRepos.exists(user.isMemberOf)
+  def allowedToCreatePrivateRepos(user: GHMyself): Future[Boolean] = {
+    for (membershipResponses <- Future.traverse(teamsAllowedToCreatePrivateRepos)(t => neoGitHub.getTeamMembership(t.getId, user.getLogin).trying)) yield {
+      membershipResponses.exists(_.map(_.result.state == "active").getOrElse(false))
+    }
+  }
 }

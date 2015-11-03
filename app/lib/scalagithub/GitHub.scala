@@ -34,6 +34,7 @@ case class RequestScopes(
 
 case class GitHubResponse[Result](
   rateLimit: RateLimit,
+  requestScopes: RequestScopes,
   result: Result
 )
 
@@ -125,6 +126,16 @@ class GitHub(ghCredentials: GitHubCredentials) {
     executeAndReadJson(addAuthAndCaching(new Builder().url(url)))
   }
 
+  def getTeamMembership(teamId: Long, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
+    val url = apiUrlBuilder
+      .addPathSegment("teams")
+      .addPathSegment(teamId.toString)
+      .addPathSegment("memberships")
+      .addPathSegment(username)
+      .build()
+
+    executeAndReadJson(addAuthAndCaching(new Builder().url(url)))
+  }
 
   def addAuthAndCaching(builder: Builder): Request = builder
     .cacheControl(AlwaysHitNetwork)
@@ -170,12 +181,12 @@ class GitHub(ghCredentials: GitHubCredentials) {
     for {
       response <- ghCredentials.okHttpClient.execute(request)
     } yield {
-      val json = Json.parse(response.body().byteStream())
-
       val rateLimit = rateLimitFrom(response)
       val requestScopes = requestScopesFrom(response)
 
-      println(rateLimit+ " " + requestScopes)
+      println(rateLimit+ " " + requestScopes + " " +request.httpUrl())
+
+      val json = Json.parse(response.body().byteStream())
 
       // println("YYY"+json)
 
@@ -183,7 +194,7 @@ class GitHub(ghCredentials: GitHubCredentials) {
 
       // println("XXX"+result)
 
-      GitHubResponse(rateLimit, result.get)
+      GitHubResponse(rateLimit, requestScopes, result.get)
     }
   }
 

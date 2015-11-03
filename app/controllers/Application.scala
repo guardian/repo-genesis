@@ -1,6 +1,7 @@
 package controllers
 
 import com.madgag.github.Implicits._
+import com.madgag.playgithub.auth.GHRequest
 import lib.Bot
 import lib.Bot.allowedToCreatePrivateRepos
 import lib.actions.Actions._
@@ -31,14 +32,23 @@ object Application extends Controller {
 
   case class Team(id: Long, name: String, size: Int)
 
-  def newRepo = OrgAuthenticated { implicit req =>
-    val teams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
-    Ok(views.html.createNewRepo(repoCreationForm, teams, allowedToCreatePrivateRepos(req.user)))
+  def newRepo = OrgAuthenticated.async { implicit req =>
+    for (allowPrivate <- allowedToCreatePrivateRepos(req.user)) yield {
+      val teams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
+      Ok(views.html.createNewRepo(repoCreationForm, teams, allowPrivate))
+    }
   }
 
   def createRepo = OrgAuthenticated.async(parse.form(repoCreationForm)) { implicit req =>
+    for {
+      allowPrivate <- allowedToCreatePrivateRepos(req.user)
+      result <- barg(req, allowPrivate)
+    } yield result
+  }
+
+  def barg(req: GHRequest[RepoCreation], allowPrivate: Boolean): Future[Result] = {
     val repoCreation = req.body
-    if (repoCreation.isPrivate && !allowedToCreatePrivateRepos(req.user)) {
+    if (repoCreation.isPrivate && !allowPrivate) {
       Future(Forbidden(s"${req.user.atLogin} is not currently allowed to create private repos"))
     } else for {
       createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, CreateRepo(name = repoCreation.name, `private` = repoCreation.isPrivate))
