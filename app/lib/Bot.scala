@@ -25,14 +25,15 @@ object Bot {
 
   def conn() = ghCreds.conn()
 
-  def neoGitHub = new GitHub(ghCreds)
+  val neoGitHub = new GitHub(ghCreds)
 
   val orgUser = conn().getOrganization(org)
 
-  val teamsAllowedToCreatePrivateRepos =
+  lazy val teamsAllowedToCreatePrivateRepos =
     config.getString("github.teams.can.create.repos.private").get.split(',').map(t => orgUser.getTeamByName(t.trim)).toSet
 
   def allowedToCreatePrivateRepos(user: GHMyself): Future[Boolean] = {
+    println(s"teamsAllowedToCreatePrivateRepos = ${teamsAllowedToCreatePrivateRepos.map(_.getId)}")
     for (membershipResponses <- Future.traverse(teamsAllowedToCreatePrivateRepos)(t => neoGitHub.getTeamMembership(t.getId, user.getLogin).trying)) yield {
       membershipResponses.exists(_.map(_.result.state == "active").getOrElse(false))
     }
