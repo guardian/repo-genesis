@@ -37,7 +37,9 @@ object Bot {
     val teamString: String = config.getString("github.teams.can.create.repos.private").get
     println(s"teamString = $teamString")
 
-    val teamIds: Set[Long] = teamString.split(',').toSet.map(_.toLong)
+    val teamIdStrings: Set[String] = teamString.split(',').toSet
+    
+    val teamIds: Set[Long] = teamIdStrings.map(_.toLong)
 
     println(s"teamIds = $teamIds")
 
