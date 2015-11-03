@@ -3,7 +3,7 @@ package controllers
 import com.madgag.github.Implicits._
 import com.madgag.playgithub.auth.GHRequest
 import lib.Bot
-import lib.Bot.allowedToCreatePrivateRepos
+import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
 import lib.scalagithub.CreateRepo
 import play.api.Play.current
