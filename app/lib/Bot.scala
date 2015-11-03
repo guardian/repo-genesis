@@ -44,9 +44,10 @@ object Bot {
     val allteams = orgUser.getTeams
 
     println(s"allteams.size = ${allteams.size}")
+    println(s"allteams.keys = ${allteams.keys}")
 
     val teamsThatCanDoPrivate: Set[GHTeam] = orgUser.getTeams.filterKeys(teamNames).values.toSet
-    
+
     println(s"teamsThatCanDoPrivate = $teamsThatCanDoPrivate")
 
     teamsThatCanDoPrivate
