@@ -29,7 +29,13 @@ object Bot {
 
   val orgUser = conn().getOrganization(org)
 
-  lazy val teamsAllowedToCreatePrivateRepos =
-    config.getString("github.teams.can.create.repos.private").get.split(',').map(t => orgUser.getTeamByName(t.trim)).toSet
+  lazy val teamsAllowedToCreatePrivateRepos = {
+
+    val teamString = config.getString("github.teams.can.create.repos.private").get
+    println(s"teamString = $teamString")
+
+    teamString.split(',').toSet.map(t => orgUser.getTeamByName(t.trim)).toSet
+
+  }
 
 }
