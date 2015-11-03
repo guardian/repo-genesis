@@ -2,6 +2,7 @@ package lib
 
 import com.madgag.github.GitHubCredentials
 import lib.scalagithub.GitHub
+import org.kohsuke.github.GHMyself
 
 import scalax.file.ImplicitConversions._
 import scalax.file.Path
@@ -24,4 +25,8 @@ object Bot {
   def neoGitHub = new GitHub(ghCreds)
 
   val orgUser = conn().getOrganization(org)
+
+  val teamsAllowedToCreatePrivateRepos = config.getString("github.teams.can.create.repos.private").get.split(',').map(t => orgUser.getTeamByName(t.trim))
+
+  def allowedToCreatePrivateRepos(user: GHMyself): Boolean = teamsAllowedToCreatePrivateRepos.exists(user.isMemberOf)
 }
