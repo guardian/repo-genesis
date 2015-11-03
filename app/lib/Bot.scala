@@ -1,14 +1,17 @@
 package lib
 
+import java.util
+
 import com.madgag.github.GitHubCredentials
 import lib.scalagithub.GitHub
-import org.kohsuke.github.GHMyself
+import org.kohsuke.github.{GHTeam, GHMyself}
 import com.madgag.github.Implicits._
 
 import scala.concurrent.Future
 import scalax.file.ImplicitConversions._
 import scalax.file.Path
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.convert.wrapAsScala._
 
 object Bot {
 
@@ -38,8 +41,15 @@ object Bot {
 
     println(s"teamNames = $teamNames")
 
-    teamNames.map(t => orgUser.getTeamByName(t.trim))
+    val allteams = orgUser.getTeams
 
+    println(s"allteams.size = ${allteams.size}")
+
+    val teamsThatCanDoPrivate: Set[GHTeam] = orgUser.getTeams.filterKeys(teamNames).values.toSet
+    
+    println(s"teamsThatCanDoPrivate = $teamsThatCanDoPrivate")
+
+    teamsThatCanDoPrivate
   }
 
 }
