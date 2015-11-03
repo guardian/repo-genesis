@@ -27,6 +27,11 @@ case class RateLimit(
   statusOpt: Option[RateLimit.Status]
 )
 
+case class RequestScopes(
+                          authedScopes: Set[String],
+                          acceptedScopes: Set[String]
+)
+
 case class GitHubResponse[Result](
   rateLimit: RateLimit,
   result: Result
@@ -168,8 +173,9 @@ class GitHub(ghCredentials: GitHubCredentials) {
       val json = Json.parse(response.body().byteStream())
 
       val rateLimit = rateLimitFrom(response)
+      val requestScopes = requestScopesFrom(response)
 
-      println(rateLimit)
+      println(rateLimit+ " " + requestScopes)
 
       // println("YYY"+json)
 
@@ -194,5 +200,10 @@ class GitHub(ghCredentials: GitHubCredentials) {
   def rateLimitStatusFrom(response: Response) = RateLimit.Status(
     response.header("X-RateLimit-Remaining").toInt,
     Instant.ofEpochSecond(response.header("X-RateLimit-Reset").toLong)
+  )
+
+  def requestScopesFrom(response: Response) = RequestScopes(
+    response.header("X-OAuth-Scopes").split(',').map(_.trim).toSet,
+    response.header("X-Accepted-OAuth-Scopes").split(',').map(_.trim).toSet
   )
 }
