@@ -126,6 +126,18 @@ class GitHub(ghCredentials: GitHubCredentials) {
     executeAndReadJson(addAuthAndCaching(new Builder().url(url)))
   }
 
+  def getTeam(org: String, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
+    // GET /orgs/:org/memberships/:username
+    val url = apiUrlBuilder
+      .addPathSegment("orgs")
+      .addPathSegment(org)
+      .addPathSegment("memberships")
+      .addPathSegment(username)
+      .build()
+
+    executeAndReadJson(addAuthAndCaching(new Builder().url(url)))
+  }
+
   def getTeamMembership(teamId: Long, username: String)(implicit ec: ExecutionContext): Future[GitHubResponse[Membership]] = {
     val url = apiUrlBuilder
       .addPathSegment("teams")

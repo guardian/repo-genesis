@@ -14,8 +14,7 @@ object Permissions {
 
     println(s"teamsAllowedToCreatePrivateRepos = $teamsAllowedToCreatePrivateRepos")
 
-    println(s"team ids = ${teamsAllowedToCreatePrivateRepos.map(_.getId)}")
-    for (membershipResponses <- Future.traverse(teamsAllowedToCreatePrivateRepos)(t => Bot.neoGitHub.getTeamMembership(t.getId, user.getLogin).trying)) yield {
+    for (membershipResponses <- Future.traverse(teamsAllowedToCreatePrivateRepos)(teamId => Bot.neoGitHub.getTeamMembership(teamId, user.getLogin).trying)) yield {
       membershipResponses.exists(_.map(_.result.state == "active").getOrElse(false))
     }
   }

@@ -32,25 +32,16 @@ object Bot {
 
   val orgUser = conn().getOrganization(org)
 
-  lazy val teamsAllowedToCreatePrivateRepos = {
+  lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
 
     val teamString: String = config.getString("github.teams.can.create.repos.private").get
     println(s"teamString = $teamString")
 
-    val teamNames: Set[String] = teamString.split(',').toSet
+    val teamIds: Set[Long] = teamString.split(',').toSet.map(_.toLong)
 
-    println(s"teamNames = $teamNames")
+    println(s"teamIds = $teamIds")
 
-    val allteams = orgUser.getTeams
-
-    println(s"allteams.size = ${allteams.size}")
-    println(s"allteams.keys = ${allteams.keys}")
-
-    val teamsThatCanDoPrivate: Set[GHTeam] = orgUser.getTeams.filterKeys(teamNames).values.toSet
-
-    println(s"teamsThatCanDoPrivate = $teamsThatCanDoPrivate")
-
-    teamsThatCanDoPrivate
+    teamIds
   }
 
 }
