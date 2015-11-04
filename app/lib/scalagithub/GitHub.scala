@@ -94,10 +94,12 @@ object Team {
 }
 
 case class Team(
-                       id: Long,
-                       name: String,
-                       slug: String
-                       )
+  id: Long,
+  name: String,
+  slug: String
+) {
+  val atSlug = "@" + slug
+}
 
 class GitHub(ghCredentials: GitHubCredentials) {
 

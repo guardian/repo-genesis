@@ -40,7 +40,7 @@ object Application extends Controller {
       val userTeams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
       println(s"${req.user.atLogin} userTeams : ${userTeams.mkString(",")}")
       println(s"privateRepoTeams = $privateRepoTeams")
-      Ok(views.html.createNewRepo(repoCreationForm, userTeams, allowPrivate))
+      Ok(views.html.createNewRepo(repoCreationForm, userTeams, allowPrivate, privateRepoTeams))
     }
   }
 

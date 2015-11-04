@@ -1,6 +1,7 @@
 @(repoCreationSettings: Form[controllers.Application.RepoCreation],
         userTeams: Seq[controllers.Application.Team],
-        allowedToCreatePrivateRepos: Boolean)(implicit req: Request[AnyContent], messages: Messages)
+        allowedToCreatePrivateRepos: Boolean,
+        teamsAllowedToCreatePrivateRepos: Set[lib.scalagithub.Team])(implicit req: Request[AnyContent], messages: Messages)
 
 @import views.html.helper.CSRF
 @implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
@@ -30,7 +31,10 @@
 
 
             <div class="form-group">
-                <label for="teamId" class="control-label"><span class="octicon octicon-jersey"></span> GitHub team with initial Admin rights</label>
+                <label for="teamId" class="control-label">
+                    <span class="octicon octicon-jersey"></span>
+                    GitHub team <small class="text-muted">…will be given Admin rights on your new repository!</small>
+                </label>
                 <select id="teamId" name="teamId" class="form-control">
                 @for(t <- userTeams) {
                     <option value="@t.id" data-team-size="@t.size" data-team-name="@t.name" >@t.name (@t.size members)</option>
@@ -89,6 +93,9 @@
                 </div>
             </div>
         }
+            <!--
+               These teams can create private repos: @teamsAllowedToCreatePrivateRepos.map(_.atSlug).mkString(", ")
+            -->
         </div>
 
         <div class="col-md-3"></div>
