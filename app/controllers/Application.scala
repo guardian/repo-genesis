@@ -55,9 +55,15 @@ object Application extends Controller {
     val repoCreation = req.body
     if (repoCreation.isPrivate && !allowPrivate) {
       Future(Forbidden(s"${req.user.atLogin} is not currently allowed to create private repos"))
-    } else for {
-      createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, CreateRepo(name = repoCreation.name, `private` = repoCreation.isPrivate))
-      _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
-    } yield Redirect(createdRepo.result.collaborationSettingsUrl)
+    } else {
+      val command = CreateRepo(
+        name = repoCreation.name,
+        description = Some(s"Placeholder description: ${req.user.atLogin} created this with repo-genesis"),
+        `private` = repoCreation.isPrivate)
+      for {
+        createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
+        _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
+      } yield Redirect(createdRepo.result.collaborationSettingsUrl)
+    }
   }
 }

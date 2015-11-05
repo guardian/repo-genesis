@@ -44,6 +44,7 @@ object CreateRepo {
 
 case class CreateRepo(
   name: String,
+  description: Option[String],
   `private`: Boolean
 )
 
