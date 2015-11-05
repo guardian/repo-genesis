@@ -53,6 +53,7 @@ object Repo {
 
 case class Repo(
   name: String,
+  full_name: String,
   html_url: String,
   teams_url: String
 ) {
