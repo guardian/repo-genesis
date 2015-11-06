@@ -62,12 +62,13 @@ object Application extends Controller {
         description = Some(s"Placeholder description: ${req.user.atLogin} created this with repo-genesis"),
         `private` = repoCreation.isPrivate)
       for {
+        team <- Bot.neoGitHub.getTeam(repoCreation.teamId) // assert team is member of org?
         createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
         _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
       } yield {
         for (slack <- Bot.slackOpt) {
           slack.send(Message(
-            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} with repo-genesis. ${routes.Application.about().absoluteURL()(req)}",
+            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} for team ${team.result.atSlug} with repo-genesis. ${routes.Application.about().absoluteURL()(req)}",
             Some("repo-genesis"),
             Some(req.user.getAvatarUrl),
             Seq.empty
