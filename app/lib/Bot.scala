@@ -1,17 +1,12 @@
 package lib
 
-import java.util
-
 import com.madgag.github.GitHubCredentials
+import com.madgag.slack.Slack
+import com.squareup.okhttp.OkHttpClient
 import lib.scalagithub.GitHub
-import org.kohsuke.github.{GHTeam, GHMyself}
-import com.madgag.github.Implicits._
 
-import scala.concurrent.Future
 import scalax.file.ImplicitConversions._
 import scalax.file.Path
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.collection.convert.wrapAsScala._
 
 object Bot {
 
@@ -46,4 +41,5 @@ object Bot {
     teamIds
   }
 
+  val slackOpt = config.getString("slack.webhook.url").map(hookUrl => new Slack(hookUrl, new OkHttpClient()))
 }

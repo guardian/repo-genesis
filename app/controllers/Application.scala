@@ -2,10 +2,11 @@ package controllers
 
 import com.madgag.github.Implicits._
 import com.madgag.playgithub.auth.GHRequest
-import lib.{Permissions, Bot}
+import com.madgag.slack.Slack.Message
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
 import lib.scalagithub.CreateRepo
+import lib.{Bot, Permissions}
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -63,7 +64,17 @@ object Application extends Controller {
       for {
         createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
         _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
-      } yield Redirect(createdRepo.result.collaborationSettingsUrl)
+      } yield {
+        for (slack <- Bot.slackOpt) {
+          slack.send(Message(
+            s"${req.user.atLogin} created repo ${createdRepo.result.html_url} with repo-genesis.",
+            Some("repo-genesis"),
+            Some(req.user.getAvatarUrl),
+            Seq.empty
+          ))
+        }
+        Redirect(createdRepo.result.collaborationSettingsUrl)
+      }
     }
   }
 }
