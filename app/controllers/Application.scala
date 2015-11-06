@@ -68,7 +68,7 @@ object Application extends Controller {
       } yield {
         for (slack <- Bot.slackOpt) {
           slack.send(Message(
-            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} for team ${team.result.atSlug} with repo-genesis. ${routes.Application.about().absoluteURL()(req)}",
+            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} for GitHub team ${team.result.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()(req)}",
             Some("repo-genesis"),
             Some(req.user.getAvatarUrl),
             Seq.empty
