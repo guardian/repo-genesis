@@ -67,7 +67,7 @@ object Application extends Controller {
       } yield {
         for (slack <- Bot.slackOpt) {
           slack.send(Message(
-            s"${req.user.atLogin} created repo ${createdRepo.result.html_url} with repo-genesis.",
+            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} with repo-genesis. ${routes.Application.about().absoluteURL()(req)}",
             Some("repo-genesis"),
             Some(req.user.getAvatarUrl),
             Seq.empty

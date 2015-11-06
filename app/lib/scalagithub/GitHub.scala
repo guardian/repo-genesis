@@ -46,7 +46,9 @@ case class CreateRepo(
   name: String,
   description: Option[String],
   `private`: Boolean
-)
+) {
+  val publicOrPrivateString = if (`private`) "private" else "public"
+}
 
 object Repo {
   implicit val readsRepo = Json.reads[Repo]
