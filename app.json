@@ -5,12 +5,16 @@
   "success_url": "/",
   "keywords": ["github", "organisation", "repository"],
   "env": {
-    "REPO_MAKER_GITHUB_ORG": {
+    "REPO_GENESIS_GITHUB_ORG": {
       "description": "The Org the repos will be created in",
       "required": true
     },
-    "REPO_MAKER_GITHUB_ACCESS_TOKEN": {
-      "description": "A GitHub access token - the bot will run with this account. Required scopes: repo",
+    "REPO_GENESIS_GITHUB_ACCESS_TOKEN": {
+      "description": "A GitHub access token - the bot will run with this account. Required scopes: read:org, repo",
+      "required": true
+    },
+    "REPO_GENESIS_TEAMS_FOR_PRIVATE_REPOS": {
+      "description": "The comma-separated *numeric ids* of the GitHub teams which are permitted to create private repos. See https://developer.github.com/v3/orgs/teams/#list-teams",
       "required": true
     },
     "GITHUB_APP_CLIENT_ID": {
@@ -18,6 +22,14 @@
     },
     "GITHUB_APP_CLIENT_SECRET": {
       "required": true
+    },
+    "APPLICATION_SECRET": {
+      "description": "Random text to use as a crypto seed for signing session cookies. See https://www.playframework.com/documentation/2.4.x/ApplicationSecret",
+      "required": true
+    },
+    "REPO_GENESIS_SLACK_WEBHOOK_URL": {
+      "description": "Slack incoming webhook to message when repo creation occurs. See https://api.slack.com/incoming-webhooks",
+      "required": false
     }
   }
 }
