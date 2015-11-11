@@ -1,18 +1,39 @@
 @()(implicit req: Request[AnyContent])
 @main {
-    <div class="jumbotron">
-        <h1>Make a new GitHub repo!</h1>
-        <p><i>We aim to be open by default</i></p>
-        <p>This instance of Repo Genesis is for <i>@lib.Bot.orgUser.displayName's</i> GitHub organisation -
-            if you're a member, <a><button class="btn btn-primary input-lg">Get started!</button></a></p>
-    </div>
-
     <div class="row">
-        <div class="col-md-6">
-            <h3>What is <i>Repo Genesis?</i></h3>
-            <p>It lets you make repos in your organisation - even if you're not the owner.</p>
+        <div class="col-md-12 text-center" >
+            <h1>Make a new GitHub repo!</h1>
+            <img class="img-responsive img-thumbnail" style="box-shadow: 0 0 15px black;" src="https://cloud.githubusercontent.com/assets/52038/11075837/51eb1590-87ef-11e5-8b9d-97e07cb9037e.png">
+
+            <p><i>Create a new GitHub repo for your organisation - even if you're not an owner</i></p>
+
+            <h3>Are you a member of <i>@lib.Bot.orgUser.displayName's</i> GitHub organisation?</h3>
         </div>
-        <div class="col-md-6">
+    </div>
+    <div class="row">
+        <div class="col-md-3" ></div>
+        <div class="col-md-3 text-center">
+            <div class=" well well-sm">
+            <h3>Yes</h3>
+                <p>Time to go create a repo...</p>
+            <a href="@routes.Application.createRepo()"><button class="btn btn-primary">
+
+                Get started!</button></a>
+            </div>
         </div>
+        <div class="col-md-3 text-center">
+            <div class="well well-sm">
+            <h3>No</h3>
+                <p>You can always run your own version of Repo Genesis!</p>
+
+
+                <a href="https://github.com/guardian/repo-genesis"><span class="mega-octicon octicon-mark-github"></span></a>
+            or
+            <a href="https://heroku.com/deploy?template=https://github.com/guardian/repo-genesis">
+            <img src="https://www.herokucdn.com/deploy/button.svg" alt="deploy to Heroku!"/>
+            </a>
+                </div>
+        </div>
+        <div class="col-md-3" ></div>
     </div>
 }
