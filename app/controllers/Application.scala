@@ -1,11 +1,11 @@
 package controllers
 
-import com.madgag.github.Implicits._
 import com.madgag.playgithub.auth.GHRequest
+import com.madgag.scalagithub.commands.CreateRepo
+import com.madgag.scalagithub.model.{Team, User}
 import com.madgag.slack.Slack.Message
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
-import lib.scalagithub.CreateRepo
 import lib.{Bot, Permissions}
 import play.api.Play.current
 import play.api.data.Form
@@ -13,7 +13,6 @@ import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 
-import scala.collection.convert.wrapAsScala._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -31,51 +30,58 @@ object Application extends Controller {
     "private" -> boolean
   )(RepoCreation.apply)(RepoCreation.unapply))
 
-  case class Team(id: Long, name: String, size: Int)
-
   def newRepo = OrgAuthenticated.async { implicit req =>
     for {
-      allowPrivate <- allowedToCreatePrivateRepos(req.user)
+      user <- req.userF
+      userTeams <- req.userTeamsF
+      allowPrivate <- allowedToCreatePrivateRepos(req)
       privateRepoTeams <- Permissions.privateRepoTeams()
     } yield {
-      val userTeams = req.gitHub.getMyTeams.get(Bot.org).map(t => Team(t.getId, t.getName, t.getMembers.size)).toSeq.sortBy(_.size)
-      println(s"${req.user.atLogin} userTeams : ${userTeams.mkString(",")}")
+      val userTeamsInOrg = userTeams.filter(_.organization.login == Bot.org).sortBy(_.members_count)
+      println(s"${user.atLogin} userTeams (${userTeams.size}) : ${userTeams.take(1).mkString(",")} ...")
       println(s"privateRepoTeams = $privateRepoTeams")
-      Ok(views.html.createNewRepo(repoCreationForm, userTeams, allowPrivate, privateRepoTeams))
+      Ok(views.html.createNewRepo(repoCreationForm, userTeamsInOrg, allowPrivate, privateRepoTeams))
     }
   }
 
   def createRepo = OrgAuthenticated.async(parse.form(repoCreationForm)) { implicit req =>
+    val repoCreation = req.body
     for {
-      allowPrivate <- allowedToCreatePrivateRepos(req.user)
-      result <- barg(req, allowPrivate)
+      _ <- assertUserAllowedToCreateRepoF
+      team <- Bot.neoGitHub.getTeam(repoCreation.teamId)
+      user <- req.userF
+      result <- executeCreationAndRedirectToRepo(user, req.body, team)
     } yield result
   }
 
-  def barg(req: GHRequest[RepoCreation], allowPrivate: Boolean): Future[Result] = {
-    val repoCreation = req.body
-    if (repoCreation.isPrivate && !allowPrivate) {
-      Future(Forbidden(s"${req.user.atLogin} is not currently allowed to create private repos"))
-    } else {
-      val command = CreateRepo(
-        name = repoCreation.name,
-        description = Some(s"Placeholder description: ${req.user.atLogin} created this with repo-genesis"),
-        `private` = repoCreation.isPrivate)
-      for {
-        team <- Bot.neoGitHub.getTeam(repoCreation.teamId) // assert team is member of org?
-        createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
-        _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
-      } yield {
-        for (slack <- Bot.slackOpt) {
-          slack.send(Message(
-            s"${req.user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.result.html_url} for GitHub team ${team.result.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()(req)}",
-            Some("repo-genesis"),
-            Some(req.user.getAvatarUrl),
-            Seq.empty
-          ))
-        }
-        Redirect(createdRepo.result.collaborationSettingsUrl)
+  def assertRepoTeamIsInOrgF(teamId: Long) = Bot.neoGitHub.getTeam(teamId).map {
+    team => assert(team.organization.login == Bot.org)
+  }
+
+  def assertUserAllowedToCreateRepoF(implicit req: GHRequest[RepoCreation]) =
+    if (req.body.isPrivate) allowedToCreatePrivateRepos(req) else Future.successful(true)
+
+
+  def executeCreationAndRedirectToRepo(user: User, repoCreation: RepoCreation, repoTeam: Team)(implicit req: RequestHeader): Future[Result] = {
+    val command = CreateRepo(
+      name = repoCreation.name,
+      description = Some(s"Placeholder description: ${user.atLogin} created this with repo-genesis"),
+      `private` = repoCreation.isPrivate)
+
+    for {
+      createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
+      _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
+    } yield {
+      for (slack <- Bot.slackOpt) {
+        slack.send(Message(
+          s"${user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.html_url}" +
+            s" for GitHub team ${repoTeam.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()}",
+          Some("repo-genesis"),
+          Some(user.avatar_url),
+          Seq.empty
+        ))
       }
+      Redirect(createdRepo.collaborationSettingsUrl)
     }
   }
 }

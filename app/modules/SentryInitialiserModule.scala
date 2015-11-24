@@ -9,7 +9,7 @@ import net.kencochrane.raven.logback.SentryAppender
 import org.slf4j.Logger._
 import org.slf4j.LoggerFactory
 import play.api
-import play.api.{Environment, Configuration}
+import play.api.{Configuration, Environment}
 
 class SentryInitialiserModule(environment: Environment, configuration: Configuration) extends AbstractModule {
   override def configure() = {

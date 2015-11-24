@@ -1,7 +1,7 @@
 @(repoCreationSettings: Form[controllers.Application.RepoCreation],
-        userTeams: Seq[controllers.Application.Team],
+        userTeams: Seq[com.madgag.scalagithub.model.Team],
         allowedToCreatePrivateRepos: Boolean,
-        teamsAllowedToCreatePrivateRepos: Set[lib.scalagithub.Team])(implicit req: Request[AnyContent], messages: Messages)
+        teamsAllowedToCreatePrivateRepos: Set[com.madgag.scalagithub.model.Team])(implicit req: Request[AnyContent], messages: Messages)
 
 @import views.html.helper.CSRF
 @implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
@@ -24,7 +24,7 @@
                 'autofocus -> true) { input =>
                 <div class="input-group" >
                     <span class="input-group-addon">
-                        <img src="@lib.Bot.orgUser.getAvatarUrl&s=40" width="20" height="20" class="img-rounded"> @lib.Bot.org /</span>
+                        <img src="@lib.Bot.orgUser.avatar_url&s=40" width="20" height="20" class="img-rounded"> @lib.Bot.org /</span>
                     @input
                 </div>
             }
@@ -37,7 +37,9 @@
                 </label>
                 <select id="teamId" name="teamId" class="form-control">
                 @for(t <- userTeams) {
-                    <option value="@t.id" data-team-size="@t.size" data-team-name="@t.name" >@t.name (@t.size members)</option>
+                    <option value="@t.id" data-team-size="@t.members_count" data-team-name="@t.name" >
+                        @t.name (@t.members_count members)
+                    </option>
                 }
                 </select>
             </div>

@@ -3,8 +3,7 @@ package lib.actions
 import com.madgag.playgithub.auth.AuthenticatedSessions.AccessToken
 import com.madgag.playgithub.auth.{Client, GHRequest}
 import controllers.Application._
-import controllers.{routes, Auth}
-import com.madgag.github.Implicits._
+import controllers.{Auth, routes}
 import lib._
 import play.api.mvc.{ActionFilter, Result}
 
@@ -23,13 +22,13 @@ object Actions {
 
   val OrganisationMembershipFilter = new ActionFilter[GHRequest] {
     override protected def filter[A](req: GHRequest[A]): Future[Option[Result]] = {
-      val login = req.user.getLogin
       for {
-        isOrgMember <- Bot.neoGitHub.checkMembership(Bot.org, login)
+        user <- req.userF
+        isOrgMember <- Bot.neoGitHub.checkMembership(Bot.org, user.login)
       } yield {
-        println(s"******* $login ${Bot.org} $isOrgMember")
+        println(s"******* ${user.atLogin} ${Bot.org} $isOrgMember")
         if (isOrgMember) None else Some(
-          Redirect(routes.Application.about).flashing("message" -> s"You're not a member of ${Bot.orgUser.atLogin}")
+          Redirect(routes.Application.about).flashing("message" -> s"You're not a member of @${Bot.org}")
         )
       }
     }

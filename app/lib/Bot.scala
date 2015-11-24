@@ -1,10 +1,12 @@
 package lib
 
-import com.madgag.github.GitHubCredentials
+import com.madgag.scalagithub.{GitHubCredentials, GitHub}
 import com.madgag.slack.Slack
 import com.squareup.okhttp.OkHttpClient
-import lib.scalagithub.GitHub
 
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scalax.file.ImplicitConversions._
 import scalax.file.Path
 
@@ -21,11 +23,9 @@ object Bot {
 
   val ghCreds = GitHubCredentials.forAccessKey(accessToken, workingDir.toPath).get
 
-  def conn() = ghCreds.conn()
-
   val neoGitHub = new GitHub(ghCreds)
 
-  val orgUser = conn().getOrganization(org)
+  val orgUser = Await.result(neoGitHub.getUser(), 3.seconds)
 
   lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
 
