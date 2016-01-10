@@ -48,13 +48,13 @@ object Application extends Controller {
     val repoCreation = req.body
     for {
       _ <- assertUserAllowedToCreateRepoF
-      team <- Bot.neoGitHub.getTeam(repoCreation.teamId)
+      team <- Bot.github.getTeam(repoCreation.teamId)
       user <- req.userF
       result <- executeCreationAndRedirectToRepo(user, req.body, team)
     } yield result
   }
 
-  def assertRepoTeamIsInOrgF(teamId: Long) = Bot.neoGitHub.getTeam(teamId).map {
+  def assertRepoTeamIsInOrgF(teamId: Long) = Bot.github.getTeam(teamId).map {
     team => assert(team.organization.login == Bot.org)
   }
 
@@ -69,8 +69,8 @@ object Application extends Controller {
       `private` = repoCreation.isPrivate)
 
     for {
-      createdRepo <- Bot.neoGitHub.createOrgRepo(Bot.org, command)
-      _ <- Bot.neoGitHub.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
+      createdRepo <- Bot.github.createOrgRepo(Bot.org, command)
+      _ <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
     } yield {
       for (slack <- Bot.slackOpt) {
         slack.send(Message(

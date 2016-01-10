@@ -24,7 +24,7 @@ object Actions {
     override protected def filter[A](req: GHRequest[A]): Future[Option[Result]] = {
       for {
         user <- req.userF
-        isOrgMember <- Bot.neoGitHub.checkMembership(Bot.org, user.login)
+        isOrgMember <- Bot.github.checkMembership(Bot.org, user.login)
       } yield {
         println(s"******* ${user.atLogin} ${Bot.org} $isOrgMember")
         if (isOrgMember) None else Some(

@@ -3,6 +3,7 @@ package lib
 import com.madgag.scalagithub.{GitHubCredentials, GitHub}
 import com.madgag.slack.Slack
 import com.squareup.okhttp.OkHttpClient
+import play.api.Logger
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -11,6 +12,8 @@ import scalax.file.ImplicitConversions._
 import scalax.file.Path
 
 object Bot {
+
+  val logger = Logger(getClass)
 
   val workingDir = Path.fromString("/tmp") / "bot" / "working-dir"
 
@@ -23,20 +26,20 @@ object Bot {
 
   val ghCreds = GitHubCredentials.forAccessKey(accessToken, workingDir.toPath).get
 
-  val neoGitHub = new GitHub(ghCreds)
+  val github = new GitHub(ghCreds)
 
-  val orgUser = Await.result(neoGitHub.getUser(), 3.seconds)
+  val orgUser = Await.result(github.getUser(), 4.seconds)
 
   lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
 
     val teamString: String = config.getString("github.teams.can.create.repos.private").get
-    println(s"teamString = $teamString")
+    logger.info(s"teamString = $teamString")
 
     val teamIdStrings: Set[String] = teamString.split(',').toSet
     
     val teamIds: Set[Long] = teamIdStrings.map(_.toLong)
 
-    println(s"teamIds = $teamIds")
+    logger.info(s"teamIds = $teamIds")
 
     teamIds
   }
