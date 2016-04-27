@@ -20,7 +20,7 @@ object Bot {
   import play.api.Play.current
   val config = play.api.Play.configuration
 
-  val org = config.getString("github.org").get
+  val orgName = config.getString("github.org").get
 
   val accessToken = config.getString("github.botAccessToken").get
 
@@ -28,7 +28,8 @@ object Bot {
 
   val github = new GitHub(ghCreds)
 
-  val orgUser = Await.result(github.getUser(), 4.seconds)
+  val org = Await.result(github.getOrg(orgName), 4.seconds)
+
 
   lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
 

@@ -24,11 +24,11 @@ object Actions {
     override protected def filter[A](req: GHRequest[A]): Future[Option[Result]] = {
       for {
         user <- req.userF
-        isOrgMember <- Bot.github.checkMembership(Bot.org, user.login)
+        isOrgMember <- Bot.github.checkMembership(Bot.orgName, user.login)
       } yield {
-        println(s"******* ${user.atLogin} ${Bot.org} $isOrgMember")
+        println(s"******* ${user.atLogin} ${Bot.orgName} $isOrgMember")
         if (isOrgMember) None else Some(
-          Redirect(routes.Application.about).flashing("message" -> s"You're not a member of @${Bot.org}")
+          Redirect(routes.Application.about).flashing("message" -> s"You're not a member of @${Bot.orgName}")
         )
       }
     }

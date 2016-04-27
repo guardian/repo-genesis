@@ -2,7 +2,7 @@ name := "repo-genesis"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
@@ -32,7 +32,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.madgag" %% "play-git-hub" % "3.6",
+  "com.madgag" %% "play-git-hub" % "3.21",
   "com.typesafe.akka" %% "akka-agent" % "2.3.2",
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
   "org.webjars" % "bootstrap" % "3.3.5",

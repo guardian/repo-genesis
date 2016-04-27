@@ -37,7 +37,7 @@ object Application extends Controller {
       allowPrivate <- allowedToCreatePrivateRepos(req)
       privateRepoTeams <- Permissions.privateRepoTeams()
     } yield {
-      val userTeamsInOrg = userTeams.filter(_.organization.login == Bot.org).sortBy(_.members_count)
+      val userTeamsInOrg = userTeams.filter(_.organization.id == Bot.org.id).sortBy(_.members_count)
       println(s"${user.atLogin} userTeams (${userTeams.size}) : ${userTeams.take(1).mkString(",")} ...")
       println(s"privateRepoTeams = $privateRepoTeams")
       Ok(views.html.createNewRepo(repoCreationForm, userTeamsInOrg, allowPrivate, privateRepoTeams))
@@ -54,10 +54,6 @@ object Application extends Controller {
     } yield result
   }
 
-  def assertRepoTeamIsInOrgF(teamId: Long) = Bot.github.getTeam(teamId).map {
-    team => assert(team.organization.login == Bot.org)
-  }
-
   def assertUserAllowedToCreateRepoF(implicit req: GHRequest[RepoCreation]) =
     if (req.body.isPrivate) allowedToCreatePrivateRepos(req) else Future.successful(true)
 
@@ -69,8 +65,8 @@ object Application extends Controller {
       `private` = repoCreation.isPrivate)
 
     for {
-      createdRepo <- Bot.github.createOrgRepo(Bot.org, command)
-      _ <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.org, repoCreation.name)
+      createdRepo <- Bot.github.createOrgRepo(Bot.orgName, command)
+      _ <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name)
     } yield {
       for (slack <- Bot.slackOpt) {
         slack.send(Message(
