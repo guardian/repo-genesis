@@ -7,6 +7,7 @@ import com.madgag.slack.Slack.Message
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
 import lib.{Bot, Permissions}
+import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -66,12 +67,14 @@ object Application extends Controller {
 
     for {
       createdRepo <- Bot.github.createOrgRepo(Bot.orgName, command)
-      _ <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name)
+      creationString = s"${user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.html_url}"
+      _ = Logger.info(creationString)
+      teamAddResult <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name)
+      _ = Logger.info(s"${user.atLogin} added repo ${createdRepo.html_url} for team ${repoCreation.teamId}: ${teamAddResult.result}")
     } yield {
       for (slack <- Bot.slackOpt) {
         slack.send(Message(
-          s"${user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.html_url}" +
-            s" for GitHub team ${repoTeam.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()}",
+            s"$creationString for GitHub team ${repoTeam.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()}",
           Some("repo-genesis"),
           Some(user.avatar_url),
           Seq.empty
