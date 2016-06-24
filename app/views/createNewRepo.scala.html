@@ -59,6 +59,45 @@
                        return opt.data('team-name').toUpperCase().indexOf(term.toUpperCase())>=0;
                     }
                 });
+
+                var nameField = $("#name");
+                var validationDiv = $("#boo");
+
+                function debounce(func, wait, immediate) {
+                    var timeout;
+                    return function() {
+                        var context = this, args = arguments;
+                        var later = function() {
+                            timeout = null;
+                            if (!immediate) func.apply(context, args);
+                        };
+                        var callNow = immediate && !timeout;
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                        if (callNow) func.apply(context, args);
+                    };
+                };
+
+                var nameChecker = debounce( function() {
+                    nameField.removeClass("is-autocheck-success").removeClass("is-autocheck-errored").popover('hide');
+                    if (nameField.val().length > 0) {
+                        nameField.addClass("is-autocheck-loading");
+
+                        var url = "@routes.Application.checkProposedRepoName("marker")";
+                        $.ajax(url.replace("marker", nameField.val())).done(function( data ) {
+                            console.log( "Sample of data:", data );
+                            nameField.removeClass("is-autocheck-loading").addClass("is-autocheck-"+(data.isGood?"success":"errored"));
+                            if (data.existingRepo) {
+                                nameField.popover({"placement": "right", "html":true, "content": "<a href='" + data.existingRepo + "'>"+data.existingRepo+"</a> already exists!"}).popover('show');
+                            }
+                        });
+                    } else {
+                        nameField.removeClass("is-autocheck-loading");
+                        nameField.popover('hide');
+                    }
+                }, 250);
+
+                nameField.bind("propertychange change click keyup input paste", nameChecker);
             });
             </script>
 

@@ -59,3 +59,18 @@ pre .long {
 .highlighter {
     animation: highlight 1s;
 }
+
+input.form-control {
+    background-repeat:no-repeat;
+    background-position:right 8px center;
+}
+
+.is-autocheck-loading {
+    background-image: url("../images/loading.gif");
+}
+.is-autocheck-errored {
+    background-image: url("../images/error.png");
+}
+.is-autocheck-success {
+    background-image: url("../images/success.png");
+}
