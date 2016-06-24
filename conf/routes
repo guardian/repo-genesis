@@ -6,6 +6,8 @@ GET         /about        controllers.Application.about()
 GET         /             controllers.Application.newRepo()
 POST        /             controllers.Application.createRepo()
 
+GET         /api/check-repo-name   controllers.Application.checkProposedRepoName(repoName)
+
 GET         /oauth/callback                                      controllers.Auth.oauthCallback(code: String)
 GET         /logout                                              controllers.Auth.logout()
 

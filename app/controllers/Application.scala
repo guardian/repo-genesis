@@ -1,8 +1,9 @@
 package controllers
 
-import com.madgag.playgithub.auth.GHRequest
+import com.madgag.github.Implicits._
+import com.madgag.playgithub.auth.{GHRequest, MinimalGHPerson}
 import com.madgag.scalagithub.commands.CreateRepo
-import com.madgag.scalagithub.model.{Team, User}
+import com.madgag.scalagithub.model.{RepoId, Team, User}
 import com.madgag.slack.Slack.Message
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
@@ -12,10 +13,20 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages.Implicits._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Success
+
+case class RepoNameCheckResults(isGood: Boolean, existingRepo: Option[String])
+
+object RepoNameCheckResults {
+  val Good = RepoNameCheckResults(true, None)
+
+  implicit val writesRepoNameCheckResults = Json.writes[RepoNameCheckResults]
+}
 
 object Application extends Controller {
 
@@ -45,13 +56,37 @@ object Application extends Controller {
     }
   }
 
+  def checkProposedRepoName(repoName: String) = OrgAuthenticated.async { implicit req =>
+    val prospectiveId = RepoId(Bot.orgName, repoName)
+    for {
+      repoTry <- Bot.github.getRepo(prospectiveId).trying
+      userRepoTry <- req.gitHub.getRepo(prospectiveId).trying
+    } yield {
+      val results = repoTry match {
+        case Success(repo) => RepoNameCheckResults(false, Some(repo.result.html_url))
+        case _ => RepoNameCheckResults.Good
+      }
+      Ok(Json.toJson(results))
+    }
+  }
+
+
+  /*
+    Create repo results:
+      * Repo already exists, you can see/admin it
+      * Repo already exists, it's private and you don't have access
+      * Repo has been created (user should be taken to admin screen)
+      * Repo creation failed...
+   */
   def createRepo = OrgAuthenticated.async(parse.form(repoCreationForm)) { implicit req =>
     val repoCreation = req.body
+    val repoId = RepoId(Bot.org.login, repoCreation.name)
+    Logger.info(s"@${MinimalGHPerson.fromRequest(req).map(_.login)} wants to create ${repoId.fullName}")
     for {
       _ <- assertUserAllowedToCreateRepoF
       team <- Bot.github.getTeam(repoCreation.teamId)
       user <- req.userF
-      result <- executeCreationAndRedirectToRepo(user, req.body, team)
+      result <- executeCreationAndRedirectToRepo(user, repoCreation, team)
     } yield result
   }
 
