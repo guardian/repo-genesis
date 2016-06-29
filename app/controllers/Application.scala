@@ -107,6 +107,11 @@ object Application extends Controller {
       teamAddResult <- Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name)
       _ = Logger.info(s"${user.atLogin} added repo ${createdRepo.html_url} for team ${repoCreation.teamId}: ${teamAddResult.result}")
     } yield {
+      val teamAddSucceeded = teamAddResult.result
+      if (!teamAddSucceeded) {
+        Logger.error(s"Failed to set team permission on ${createdRepo.html_url} for team ${repoCreation.teamId}") // trigger sentry
+      }
+
       for (slack <- Bot.slackOpt) {
         slack.send(Message(
             s"$creationString for GitHub team ${repoTeam.atSlug} with Repo Genesis: ${routes.Application.about().absoluteURL()}",
