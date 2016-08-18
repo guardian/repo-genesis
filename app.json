@@ -6,11 +6,11 @@
   "keywords": ["github", "organisation", "repository"],
   "env": {
     "REPO_GENESIS_GITHUB_ORG": {
-      "description": "The Org the repos will be created in",
+      "description": "The GitHub Org the repos will be created in, eg. 'guardian'",
       "required": true
     },
     "REPO_GENESIS_GITHUB_ACCESS_TOKEN": {
-      "description": "A GitHub access token - the bot will run with this account. Required scopes: read:org, repo",
+      "description": "A GitHub access token - the bot will run with this account, and it will need to be an Owner of your GitHub org. Required scopes: read:org, repo",
       "required": true
     },
     "REPO_GENESIS_TEAMS_FOR_PRIVATE_REPOS": {
