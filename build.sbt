@@ -32,6 +32,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
+  "io.zman" %% "atmos" % "2.1",
   "com.madgag" %% "play-git-hub" % "3.27",
   "com.typesafe.akka" %% "akka-agent" % "2.3.2",
   "net.kencochrane.raven" % "raven-logback" % "6.0.0",
