@@ -98,8 +98,7 @@ object Application extends Controller {
   def executeCreationAndRedirectToRepo(user: User, repoCreation: RepoCreation, repoTeam: Team)(implicit req: RequestHeader): Future[Result] = {
     import atmos.dsl._
 
-    // Terminate after 5 failed attempts.
-    implicit val retryPolicy = retryFor { 4 attempts }
+    implicit val retryPolicy = retryFor { 4 attempts } onResult { case succeeded: Boolean if !succeeded => rejectResult }
 
     val command = CreateRepo(
       name = repoCreation.name,
@@ -110,7 +109,7 @@ object Application extends Controller {
       createdRepo <- Bot.github.createOrgRepo(Bot.orgName, command)
       creationString = s"${user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.html_url}"
       _ = Logger.info(creationString)
-      teamAddResult <- retry("Adding Team Permission") { Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name) }
+      teamAddResult <- retryAsync("Adding Team Permission")  { Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name) }
       _ = Logger.info(s"${user.atLogin} added repo ${createdRepo.html_url} for team ${repoCreation.teamId}: ${teamAddResult.result}")
     } yield {
       val teamAddSucceeded = teamAddResult.result
