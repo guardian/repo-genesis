@@ -1,10 +1,14 @@
 package controllers
 
+import akka.actor.Scheduler
+import akka.pattern.after
 import com.madgag.github.Implicits._
 import com.madgag.playgithub.auth.{GHRequest, MinimalGHPerson}
+import com.madgag.scalagithub.GitHubResponse
 import com.madgag.scalagithub.commands.CreateRepo
 import com.madgag.scalagithub.model.{RepoId, Team, User}
 import com.madgag.slack.Slack.Message
+import controllers.RetryDelays.fibonacci
 import lib.Permissions.allowedToCreatePrivateRepos
 import lib.actions.Actions._
 import lib.{Bot, Permissions}
@@ -17,9 +21,10 @@ import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
-import scala.util.Success
+import scala.util.{Random, Success}
 
 case class RepoNameCheckResults(isGood: Boolean, existingRepo: Option[String])
 
@@ -29,7 +34,26 @@ object RepoNameCheckResults {
   implicit val writesRepoNameCheckResults = Json.writes[RepoNameCheckResults]
 }
 
+// https://gist.github.com/viktorklang/9414163
+object RetryDelays {
+  def withJitter(delays: Seq[FiniteDuration], maxJitter: Double, minJitter: Double) =
+    delays.map(_ * (minJitter + (maxJitter - minJitter) * Random.nextDouble))
+
+  val fibonacci: Stream[FiniteDuration] = 0.seconds #:: 1.seconds #:: (fibonacci zip fibonacci.tail).map{ t => t._1 + t._2 }
+}
+
 object Application extends Controller {
+
+  implicit val s = play.api.libs.concurrent.Akka.system.scheduler
+
+  def retry[T](desc: String, f: => Future[T], delays: Seq[FiniteDuration])(acceptable: T => Boolean)(implicit ec: ExecutionContext, s: Scheduler ): Future[T] = {
+    f.filter(acceptable) recoverWith {
+      case _ if delays.nonEmpty =>
+        val retryDelay = delays.head
+        Logger.info(s"Will retry '$desc' after $retryDelay")
+        after(retryDelay, s)(retry(desc, f, delays.tail)(acceptable))
+    }
+  }
 
   def about = Action { implicit req =>
     Ok(views.html.about())
@@ -96,9 +120,6 @@ object Application extends Controller {
 
 
   def executeCreationAndRedirectToRepo(user: User, repoCreation: RepoCreation, repoTeam: Team)(implicit req: RequestHeader): Future[Result] = {
-    import atmos.dsl._
-
-    implicit val retryPolicy = retryFor { 4 attempts } onResult { case succeeded: Boolean if !succeeded => rejectResult }
 
     val command = CreateRepo(
       name = repoCreation.name,
@@ -109,7 +130,7 @@ object Application extends Controller {
       createdRepo <- Bot.github.createOrgRepo(Bot.orgName, command)
       creationString = s"${user.atLogin} created ${command.publicOrPrivateString} repo ${createdRepo.html_url}"
       _ = Logger.info(creationString)
-      teamAddResult <- retryAsync("Adding Team Permission")  { Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name) }
+      teamAddResult: GitHubResponse[Boolean] <- retry[GitHubResponse[Boolean]](s"Make team ${repoCreation.teamId} admin for '${repoCreation.name}'", Bot.github.addTeamRepo(repoCreation.teamId, Bot.orgName, repoCreation.name), fibonacci.take(5))( _.result == true)
       _ = Logger.info(s"${user.atLogin} added repo ${createdRepo.html_url} for team ${repoCreation.teamId}: ${teamAddResult.result}")
     } yield {
       val teamAddSucceeded = teamAddResult.result
