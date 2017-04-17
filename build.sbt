@@ -32,18 +32,18 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.madgag" %% "play-git-hub" % "3.27",
+  "com.madgag" %% "play-git-hub" % "4.2",
   "com.typesafe.akka" %% "akka-agent" % "2.3.2",
-  "net.kencochrane.raven" % "raven-logback" % "6.0.0",
+  "com.getsentry.raven" % "raven-logback" % "8.0.2",
   "org.webjars" % "bootstrap" % "3.3.5",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
   "org.webjars.bower" % "octicons" % "3.1.0",
   "org.webjars.bower" % "select2" % "3.5.4",
   "org.webjars.bower" % "select2-bootstrap-css" % "1.4.6",
-  "org.webjars.npm" % "handlebars" % "3.0.3",
-  "com.netaporter" %% "scala-uri" % "0.4.11",
+  "org.webjars.npm" % "handlebars" % "4.0.6",
+  "com.netaporter" %% "scala-uri" % "0.4.16",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3-1",
-  "org.scalatestplus" %% "play" % "1.4.0-M4" % "test"
+  "org.scalatestplus" %% "play" % "1.4.0" % "test"
 )
 
 sources in (Compile,doc) := Seq.empty

@@ -1,8 +1,8 @@
 package lib
 
-import com.madgag.scalagithub.{GitHubCredentials, GitHub}
+import com.madgag.scalagithub.{GitHub, GitHubCredentials}
 import com.madgag.slack.Slack
-import com.squareup.okhttp.OkHttpClient
+import okhttp3.OkHttpClient
 import play.api.Logger
 
 import scala.concurrent.Await

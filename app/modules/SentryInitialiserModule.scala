@@ -2,10 +2,10 @@ package modules
 
 import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.classic.{Logger, LoggerContext}
+import com.getsentry.raven.RavenFactory._
+import com.getsentry.raven.dsn.Dsn
+import com.getsentry.raven.logback.SentryAppender
 import com.google.inject.AbstractModule
-import net.kencochrane.raven.RavenFactory._
-import net.kencochrane.raven.dsn.Dsn
-import net.kencochrane.raven.logback.SentryAppender
 import org.slf4j.Logger._
 import org.slf4j.LoggerFactory
 import play.api
