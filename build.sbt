@@ -41,6 +41,7 @@ libraryDependencies ++= Seq(
   "org.webjars.bower" % "select2" % "3.5.4",
   "org.webjars.bower" % "select2-bootstrap-css" % "1.4.6",
   "org.webjars.npm" % "handlebars" % "4.0.6",
+  "org.webjars.npm" % "amdefine" % "0.1.0",
   "com.netaporter" %% "scala-uri" % "0.4.16",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3-1",
   "org.scalatestplus" %% "play" % "1.4.0" % "test"
