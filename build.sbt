@@ -32,7 +32,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.madgag" %% "play-git-hub" % "4.2",
+  "com.madgag" %% "play-git-hub" % "4.3",
   "com.typesafe.akka" %% "akka-agent" % "2.3.2",
   "com.getsentry.raven" % "raven-logback" % "8.0.2",
   "org.webjars" % "bootstrap" % "3.3.5",
@@ -40,7 +40,6 @@ libraryDependencies ++= Seq(
   "org.webjars.bower" % "octicons" % "3.1.0",
   "org.webjars.bower" % "select2" % "3.5.4",
   "org.webjars.bower" % "select2-bootstrap-css" % "1.4.6",
-  "org.webjars.npm" % "handlebars" % "3.0.3",
   "com.netaporter" %% "scala-uri" % "0.4.16",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3-1",
   "org.scalatestplus" %% "play" % "1.4.0" % "test"
