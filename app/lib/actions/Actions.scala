@@ -1,35 +1,40 @@
 package lib.actions
 
 import com.madgag.playgithub.auth.AuthenticatedSessions.AccessToken
-import com.madgag.playgithub.auth.{Client, GHRequest}
-import controllers.Application._
-import controllers.{Auth, routes}
+import com.madgag.playgithub.auth.GHRequest
+import controllers.routes
 import lib._
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionBuilder, ActionFilter, AnyContent, BodyParser, Result}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scalax.file.ImplicitConversions._
+import scala.concurrent.{ExecutionContext, Future}
 
-object Actions {
+class Actions(
+  bot: Bot,
+  bodyParser: BodyParser[AnyContent]
+)(implicit
+  authClient: com.madgag.playgithub.auth.Client,
+  ec: ExecutionContext
+) {
   private val authScopes = Seq("read:org")
-
-  implicit val authClient: Client = Auth.authClient
 
   implicit val provider = AccessToken.FromSession
 
-  val GitHubAuthenticatedAction = com.madgag.playgithub.auth.Actions.gitHubAction(authScopes, Bot.workingDir.toPath)
+  val GitHubAuthenticatedAction =
+    com.madgag.playgithub.auth.Actions.gitHubAction(authScopes, bot.workingDir, bodyParser)
 
-  val OrganisationMembershipFilter = new ActionFilter[GHRequest] {
-    override protected def filter[A](req: GHRequest[A]): Future[Option[Result]] = {
-      for {
-        user <- req.userF
-        isOrgMember <- Bot.github.checkMembership(Bot.orgName, user.login)
-      } yield {
-        println(s"******* ${user.atLogin} ${Bot.orgName} $isOrgMember")
-        if (isOrgMember) None else Some(
-          Redirect(routes.Application.about).flashing("message" -> s"You're not a member of @${Bot.orgName}")
-        )
+  val OrganisationMembershipFilter: ActionFilter[GHRequest] = new ActionFilter[GHRequest] {
+
+    def executionContext = ec
+
+    override protected def filter[A](req: GHRequest[A]): Future[Option[Result]] = for {
+      user <- req.userF
+      isOrgMember <- bot.github.checkMembership(bot.orgLogin, user.login)
+    } yield {
+      println(s"******* ${user.atLogin} ${bot.orgLogin} $isOrgMember")
+
+      Option.when(!isOrgMember) {
+        Redirect(routes.Application.about()).flashing("message" -> s"You're not a member of @${bot.orgLogin}")
       }
     }
   }

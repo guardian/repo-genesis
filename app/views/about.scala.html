@@ -1,4 +1,5 @@
-@()(implicit req: Request[AnyContent])
+@import com.madgag.scalagithub.model.Org
+@(org: Org)(implicit req: Request[AnyContent])
 @main {
     <div class="row">
         <div class="col-md-12 text-center" >
@@ -7,7 +8,7 @@
 
             <p><i>Create a new GitHub repo for your organisation - even if you're not an owner</i></p>
 
-            <h3>Are you a member of <i>@lib.Bot.org.displayName's</i> GitHub organisation?</h3>
+            <h3>Are you a member of <i>@org.displayName's</i> GitHub organisation?</h3>
         </div>
     </div>
     <div class="row">
