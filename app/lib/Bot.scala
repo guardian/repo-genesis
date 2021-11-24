@@ -1,49 +1,47 @@
 package lib
 
+import com.madgag.scalagithub.model.Org
 import com.madgag.scalagithub.{GitHub, GitHubCredentials}
-import com.madgag.slack.Slack
 import okhttp3.OkHttpClient
-import play.api.Logger
+import play.api.{Configuration, Logger}
 
+import java.nio.file.Path
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scalax.file.ImplicitConversions._
-import scalax.file.Path
+
+case class Bot(
+  workingDir: Path,
+  github: GitHub,
+  org: Org,
+  teamsAllowedToCreatePrivateRepos: Set[Long]
+) {
+  val orgLogin: String = org.login
+}
 
 object Bot {
+  def from(configuration: Configuration): Bot = {
+    val workingDir = Path.of("/tmp", "bot", "working-dir")
+    val orgName = configuration.get[String]("github.org")
 
-  val logger = Logger(getClass)
+    val accessToken = configuration.get[String]("github.botAccessToken")
 
-  val workingDir = Path.fromString("/tmp") / "bot" / "working-dir"
+    val ghCreds = GitHubCredentials.forAccessKey(accessToken, workingDir).get
 
-  import play.api.Play.current
-  val config = play.api.Play.configuration
+    val github = new GitHub(ghCreds)
+    val org = Await.result(github.getOrg(orgName), 4.seconds)
 
-  val orgName = config.getString("github.org").get
+    lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
+      val teamString: String = configuration.get[String]("github.teams.can.create.repos.private")
 
-  val accessToken = config.getString("github.botAccessToken").get
-
-  val ghCreds = GitHubCredentials.forAccessKey(accessToken, workingDir.toPath).get
-
-  val github = new GitHub(ghCreds)
-
-  val org = Await.result(github.getOrg(orgName), 4.seconds)
-
-
-  lazy val teamsAllowedToCreatePrivateRepos: Set[Long] = {
-
-    val teamString: String = config.getString("github.teams.can.create.repos.private").get
-    logger.info(s"teamString = $teamString")
-
-    val teamIdStrings: Set[String] = teamString.split(',').toSet
-    
-    val teamIds: Set[Long] = teamIdStrings.map(_.toLong)
-
-    logger.info(s"teamIds = $teamIds")
-
-    teamIds
+      val teamIdStrings: Set[String] = teamString.split(',').toSet.filter(_.nonEmpty)
+      teamIdStrings.map(_.toLong)
+    }
+    Bot(
+      workingDir,
+      github,
+      org.result,
+      teamsAllowedToCreatePrivateRepos
+    )
   }
-
-  val slackOpt = config.getString("slack.webhook.url").map(hookUrl => new Slack(hookUrl, new OkHttpClient()))
 }

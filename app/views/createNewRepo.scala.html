@@ -1,30 +1,34 @@
-@(repoCreationSettings: Form[controllers.Application.RepoCreation],
-        userTeams: Seq[com.madgag.scalagithub.model.Team],
-        allowedToCreatePrivateRepos: Boolean,
-        teamsAllowedToCreatePrivateRepos: Set[com.madgag.scalagithub.model.Team])(implicit req: Request[AnyContent], messages: Messages)
+@import com.madgag.scalagithub.model.Org
+@(
+    org: Org,
+    repoCreationSettings: Form[controllers.Application.RepoCreation],
+    userTeams: Seq[com.madgag.scalagithub.model.Team],
+    allowedToCreatePrivateRepos: Boolean,
+    teamsAllowedToCreatePrivateRepos: Set[com.madgag.scalagithub.model.Team]
+)(implicit req: Request[AnyContent], messages: Messages)
 
 @import views.html.helper.CSRF
-@implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
+@implicitFieldConstructor = @{ b3.vertical.fieldConstructor() }
 
 @main {
 
     <div class="row">
         <div class="col-md-3"></div>
         <div class="col-md-6">
-        @b3.form(routes.Application.createRepo) {
+        @b3.form(routes.Application.createRepo()) {
             @CSRF.formField
 
             @b3.inputWrapped(
                 "text",
                 repoCreationSettings("name"),
-                '_label -> "Repository name",
-                'maxlength -> "100",
-                'required -> true,
-                'pattern -> "^[A-Za-z0-9_-]+$",
-                'autofocus -> true) { input =>
+                Symbol("_label") -> "Repository name",
+                Symbol("maxlength") -> "100",
+                Symbol("required") -> true,
+                Symbol("pattern") -> "^[A-Za-z0-9_-]+$",
+                Symbol("autofocus") -> true) { input =>
                 <div class="input-group" >
                     <span class="input-group-addon">
-                        <img src="@lib.Bot.org.avatar_url&s=40" width="20" height="20" class="img-rounded"> @lib.Bot.orgName /</span>
+                        <img src="@org.avatar_url&s=40" width="20" height="20" class="img-rounded"> @org.login /</span>
                     @input
                 </div>
             }

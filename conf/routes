@@ -2,14 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /about        controllers.Application.about()
-GET         /             controllers.Application.newRepo()
-POST        /             controllers.Application.createRepo()
+GET         /about                      controllers.Application.about()
+GET         /                           controllers.Application.newRepo()
+POST        /                           controllers.Application.createRepo()
 
-GET         /api/check-repo-name   controllers.Application.checkProposedRepoName(repoName)
+GET         /api/check-repo-name        controllers.Application.checkProposedRepoName(repoName)
 
-GET         /oauth/callback                                      controllers.Auth.oauthCallback(code: String)
-GET         /logout                                              controllers.Auth.logout()
+GET         /oauth/callback             controllers.Auth.oauthCallback(code: String)
+GET         /logout                     controllers.Auth.logout()
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                                        controllers.Assets.at(path="/public", file)
+GET         /assets/*file               controllers.Assets.at(path="/public", file)
