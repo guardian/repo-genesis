@@ -2,7 +2,7 @@ name := "repo-genesis"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.10"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
