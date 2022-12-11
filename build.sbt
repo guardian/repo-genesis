@@ -23,9 +23,7 @@ TwirlKeys.templateImports ++= Seq(
 
 routesImport ++= Seq("lib._","com.madgag.github._")
 
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases")
-)
+resolvers ++= Resolver.sonatypeOssRepos("releases")
 
 libraryDependencies ++= Seq(
   filters,
