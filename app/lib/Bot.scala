@@ -2,8 +2,7 @@ package lib
 
 import com.madgag.scalagithub.model.Org
 import com.madgag.scalagithub.{GitHub, GitHubCredentials}
-import okhttp3.OkHttpClient
-import play.api.{Configuration, Logger}
+import play.api.Configuration
 
 import java.nio.file.Path
 import scala.concurrent.Await
