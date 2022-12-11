@@ -5,7 +5,7 @@ import com.madgag.playgithub.auth.GHRequest
 import controllers.routes
 import lib._
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionBuilder, ActionFilter, AnyContent, BodyParser, Result}
+import play.api.mvc.{ActionFilter, AnyContent, BodyParser, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
