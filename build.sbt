@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   filters,
   "com.madgag" %% "play-git-hub" % "5.5",
   "com.softwaremill.macwire" %% "macros" % "2.5.8" % Provided, // slight finesse: 'provided' as only used for compile
-  "org.webjars" % "bootstrap" % "3.4.1",
+  "org.webjars" % "bootstrap" % "5.3.0",
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4",
   "org.webjars.bower" % "octicons" % "4.3.0",
   "org.webjars.bower" % "select2" % "3.5.4",
