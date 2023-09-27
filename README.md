@@ -1,11 +1,8 @@
-# repo-genesis
+# repo-genesis - DECOMMISSIONED
 
 _Allow everyone in your GitHub organisation to create public repos, not just owners_
 
-At the Guardian, we have a copy of _repo-genesis_ running at **https://repo-genesis.herokuapp.com/** to allow
-everyone in our organisation to create new repos.
+This tool has been decommissioned - see:
 
-If you _don't_ work at the Guardian ([**we're hiring!**](http://developers.theguardian.com/)) and you'd like to run
-your own instance of _repo-genesis_, you can deploy one quickly here:
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/guardian/repo-genesis)
+* https://github.com/guardian/recommendations/blob/main/github.md#creating-a-new-repository
+* https://github.com/guardian/recommendations/pull/133
